@@ -1,0 +1,78 @@
+namespace: pezzo-server
+pezzo-server:
+  defines: runnable
+  metadata:
+    name: pezzo-server
+    description: Server component of the pezzo application handling API requests.
+    icon: https://emojiapi.dev/api/v1/rocket.svg
+  containers:
+    pezzo-server:
+      build: .
+  services:
+    application-port:
+      container: pezzo-server
+      port: <- $port
+      host-port: <- $port
+      publish: false
+      protocol: TCP
+      description: The port where the application is exposed to handle API requests.
+  connections:
+    database:
+      target: postgresql/db
+      service: postgres
+    supertokens:
+      target: radicle/org-node
+      service: node
+    console:
+      target: rabbitmq/rabbitmq
+      service: rabbitmq-ui-1
+    kafka:
+      target: kafka/base
+      service: service
+    opensearch:
+      target: radicle/org-node
+      service: api
+    redis:
+      target: redis/redis
+      service: redis-svc
+  variables:
+    port:
+      env: PORT
+      type: string
+      description: The port where the application is exposed to handle API requests.
+      value: '3000'
+    pino-prettify:
+      env: PINO_PRETTIFY
+      type: string
+      description: Flag for prettifying PINO logs.
+      value: 'false'
+    database-url:
+      env: DATABASE_URL
+      type: string
+      description: Connection string of the PostgreSQL database.
+      value: <- connection-hostname("database")
+    supertokens-connection-uri:
+      env: SUPERTOKENS_CONNECTION_URI
+      type: string
+      description: Connection string of the Supertokens service.
+      value: <- connection-hostname("supertokens")
+    console-host:
+      env: CONSOLE_HOST
+      type: string
+      description: Connection string of the console service.
+      value: <- connection-hostname("console")
+    kafka-brokers:
+      env: KAFKA_BROKERS
+      type: string
+      description: Connection string of Kafka brokers.
+      value: <- connection-hostname("kafka")
+    opensearch-url:
+      env: OPENSEARCH_URL
+      type: string
+      description: Connection string of Opensearch service.
+      value: <- connection-hostname("opensearch")
+    redis-url:
+      env: REDIS_URL
+      type: string
+      description: Connection string of Redis cache.
+      value: <- connection-hostname("redis")
