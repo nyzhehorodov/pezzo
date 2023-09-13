@@ -1,0 +1,85 @@
+namespace: pezzo
+pezzo:
+  defines: runnable
+  metadata:
+    name: pezzo
+    description: A modern and fast web platform
+    icon: https://github.com/pezzolabs/pezzo
+  containers:
+    pezzo:
+      build: .
+  services:
+    server:
+      container: pezzo
+      port: <- $port
+      host-port: <- $port
+      publish: false
+      protocol: TCP
+      description: API of the server app
+    console:
+      container: pezzo
+      port: 8080
+      host-port: 8080
+      publish: false
+      protocol: TCP
+      description: Web UI of the Console app
+  connections:
+    database:
+      target: postgresql/db
+      service: postgres
+    supertokens:
+      target: consul/node
+      service: server
+    console:
+      target: apache/apache
+      service: apache-http
+    kafka:
+      target: ''
+      service: ''
+    opensearch:
+      target: radicle/org-node
+      service: api
+    redis:
+      target: redis/redis
+      service: redis-svc
+  variables:
+    pino-prettify:
+      env: PINO_PRETTIFY
+      type: boolean
+      description: Format logs for readability.
+      value: 'true'
+    database-url:
+      env: DATABASE_URL
+      type: string
+      description: Database URL for the PostgreSQL service.
+      value: <- connection-hostname("database")
+    supertokens-connection-uri:
+      env: SUPERTOKENS_CONNECTION_URI
+      type: string
+      description: SuperTokens' service URL.
+      value: <- connection-hostname("supertokens")
+    console-host:
+      env: CONSOLE_HOST
+      type: string
+      description: Console application's host.
+      value: <- connection-hostname("console")
+    kafka-brokers:
+      env: KAFKA_BROKERS
+      type: string
+      description: Apache Kafka brokers' URLs.
+      value: <- connection-hostname("kafka")
+    opensearch-url:
+      env: OPENSEARCH_URL
+      type: string
+      description: OpenSearch service's URL.
+      value: <- connection-hostname("opensearch")
+    redis-url:
+      env: REDIS_URL
+      type: string
+      description: Redis service's URL.
+      value: <- connection-hostname("redis")
+    port:
+      env: PORT
+      type: int
+      description: Port on which the server app is running.
+      value: '3000'
